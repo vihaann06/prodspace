@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import Dashboard from './components/Dashboard';
+import About from './components/About';
 import { authService } from './services/authService';
 import './App.css';
 
@@ -97,6 +98,10 @@ function App() {
                 <Dashboard onSignOut={handleSignOut} /> : 
                 <Navigate to="/signin" replace />
             } 
+          />
+          <Route 
+            path="/about"
+            element={<About />}
           />
           <Route 
             path="/" 

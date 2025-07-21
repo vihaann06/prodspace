@@ -227,7 +227,7 @@ const SignIn = ({ onSignIn }) => {
               <p className="text-lg text-gray-300 mb-6">
                 Learn more about ProdSpace and discover how it can transform your productivity journey.
               </p>
-              <button className="btn-primary px-6 py-3 text-base">
+              <button className="btn-primary px-6 py-3 text-base" onClick={() => window.open('/about', '_blank')}>
                 Learn More
               </button>
             </div>

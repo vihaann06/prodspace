@@ -434,7 +434,7 @@ const SignUp = ({ onSignUp }) => {
               <p className="text-lg text-gray-300 mb-6">
                 Join thousands of users who have transformed their productivity with our comprehensive suite of tools.
               </p>
-              <button className="btn-primary px-6 py-3 text-base">
+              <button className="btn-primary px-6 py-3 text-base" onClick={() => window.open('/about', '_blank')}>
                 Learn More
               </button>
             </div>
