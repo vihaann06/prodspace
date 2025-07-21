@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 
@@ -143,9 +143,13 @@ const SignIn = ({ onSignIn }) => {
                     </div>
                     
                     <div className="text-sm">
-                      <a href="#" className="font-medium underline" style={{ color: '#6ee7b7' }}>
+                      <button
+                        type="button"
+                        className="font-medium underline"
+                        style={{ color: '#6ee7b7', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                      >
                         Forgot your password?
-                      </a>
+                      </button>
                     </div>
                   </div>
                   

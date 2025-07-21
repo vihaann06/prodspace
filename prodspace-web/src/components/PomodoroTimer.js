@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, Settings, X } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { Play, Pause, RotateCcw, X } from 'lucide-react';
 import { fetchTodayEvents } from '../services/calendarService';
 
 const PomodoroTimer = () => {
@@ -10,18 +10,17 @@ const PomodoroTimer = () => {
   const [customWork, setCustomWork] = useState(25);
   const [customBreak, setCustomBreak] = useState(5);
   const [showCustomModal, setShowCustomModal] = useState(false);
-  const [completedSessions, setCompletedSessions] = useState(0);
   const [currentTask, setCurrentTask] = useState(null);
   
   const intervalRef = useRef(null);
   const audioRef = useRef(null);
 
   // Timer presets
-  const timerPresets = {
+  const timerPresets = useMemo(() => ({
     '50-10': { work: 50, break: 10 },
     '25-5': { work: 25, break: 5 },
     'custom': { work: customWork, break: customBreak }
-  };
+  }), [customWork, customBreak]);
 
   // Initialize timer when mode changes
   useEffect(() => {
@@ -29,7 +28,7 @@ const PomodoroTimer = () => {
     setTimeLeft(preset.work * 60);
     setIsWorkTime(true);
     setIsRunning(false);
-  }, [selectedMode, customWork, customBreak]);
+  }, [selectedMode, customWork, customBreak, timerPresets]);
 
   // Load current task from calendar
   useEffect(() => {
@@ -135,6 +134,23 @@ const PomodoroTimer = () => {
     }
   };
 
+  // Handle timer completion
+  const handleTimerComplete = useCallback(() => {
+    setIsRunning(false);
+    
+    if (isWorkTime) {
+      // Work session completed, switch to break
+      setIsWorkTime(false);
+      const preset = timerPresets[selectedMode];
+      setTimeLeft(preset.break * 60);
+    } else {
+      // Break completed, switch to work
+      setIsWorkTime(true);
+      const preset = timerPresets[selectedMode];
+      setTimeLeft(preset.work * 60);
+    }
+  }, [isWorkTime, timerPresets, selectedMode]);
+
   // Timer countdown
   useEffect(() => {
     if (isRunning && timeLeft > 0) {
@@ -158,30 +174,12 @@ const PomodoroTimer = () => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isRunning, timeLeft]);
+  }, [isRunning, timeLeft, handleTimerComplete]);
 
   // Audio notification
   const playNotification = () => {
     if (audioRef.current) {
       audioRef.current.play().catch(e => console.log('Audio play failed:', e));
-    }
-  };
-
-  // Handle timer completion
-  const handleTimerComplete = () => {
-    setIsRunning(false);
-    
-    if (isWorkTime) {
-      // Work session completed, switch to break
-      setIsWorkTime(false);
-      const preset = timerPresets[selectedMode];
-      setTimeLeft(preset.break * 60);
-      setCompletedSessions(prev => prev + 1);
-    } else {
-      // Break completed, switch to work
-      setIsWorkTime(true);
-      const preset = timerPresets[selectedMode];
-      setTimeLeft(preset.work * 60);
     }
   };
 

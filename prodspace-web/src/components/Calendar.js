@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { fetchTodos } from '../services/todoService';
 import { assignTodoToTime, fetchTodayEvents, updateTodoTime } from '../services/calendarService';
 
@@ -48,14 +48,14 @@ const Calendar = () => {
   }, []);
 
   // Calculate position of the red line (current time)
-  const getCurrentTimePosition = () => {
+  const getCurrentTimePosition = useCallback(() => {
     const now = currentTime;
     const minutesSinceStart = (now.getHours() - START_HOUR) * 60 + now.getMinutes();
     if (minutesSinceStart < 0 || now.getHours() > END_HOUR) return null;
     const position = (minutesSinceStart / 60) * HOUR_HEIGHT;
     console.log('[Calendar] Current time:', now.toLocaleTimeString(), '| Red line position (px):', position);
     return position;
-  };
+  }, [currentTime]);
 
   // Auto-scroll to current time on mount and when current time changes
   useEffect(() => {
@@ -67,7 +67,7 @@ const Calendar = () => {
       const scrollTo = Math.max(0, position - containerHeight / 2);
       container.scrollTo({ top: scrollTo, behavior: 'smooth' });
     }
-  }, [currentTime]);
+  }, [currentTime, getCurrentTimePosition]);
 
   // Format hour label
   const formatHour = (hour) => {
@@ -256,7 +256,7 @@ const Calendar = () => {
       
       if (isRepositioning) {
         // Update existing todo's time
-        const { data, error } = await updateTodoTime(
+        const { error } = await updateTodoTime(
           draggedTodo.id,
           startTime.toISOString(),
           draggedTodo.estimate || 30
@@ -394,13 +394,9 @@ const Calendar = () => {
                   color: '#1f2937'
                 }}
               >
-                <div className="flex items-start justify-between h-full">
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-sm truncate">{todo.text}</h4>
-                    <div className="flex items-center mt-2 text-xs opacity-80">
-                      <span>{todo.estimate || 30} min</span>
-                    </div>
-                  </div>
+                <div className="flex items-center justify-between h-full">
+                  <div className="font-semibold text-sm truncate">{todo.text}</div>
+                  <div className="ml-4 text-sm font-bold" style={{ color: '#059669' }}>{todo.estimate || 30} min</div>
                 </div>
               </div>
             );

@@ -452,8 +452,6 @@ const AddHabitModal = ({ onClose, onAdd }) => {
 // Habit Calendar Component
 const HabitCalendar = ({ trackedDates, startDate }) => {
   const today = new Date();
-  const start = new Date(startDate);
-  const end = new Date(today);
   
   // Generate calendar days (last 30 days)
   const days = [];

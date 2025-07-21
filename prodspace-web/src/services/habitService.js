@@ -124,7 +124,7 @@ export const recordRelapse = async (habitId) => {
     const now = new Date().toISOString();
     
     // Get current habit data
-    const { data: habit, error: fetchError } = await supabase
+    const { error: fetchError } = await supabase
       .from('habits')
       .select('*')
       .eq('id', habitId)
