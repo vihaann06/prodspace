@@ -15,14 +15,12 @@ const PomodoroTimer = () => {
   const intervalRef = useRef(null);
   const audioRef = useRef(null);
 
-  // Timer presets
   const timerPresets = useMemo(() => ({
     '50-10': { work: 50, break: 10 },
     '25-5': { work: 25, break: 5 },
     'custom': { work: customWork, break: customBreak }
   }), [customWork, customBreak]);
 
-  // Initialize timer when mode changes
   useEffect(() => {
     const preset = timerPresets[selectedMode];
     setTimeLeft(preset.work * 60);
@@ -30,7 +28,6 @@ const PomodoroTimer = () => {
     setIsRunning(false);
   }, [selectedMode, customWork, customBreak, timerPresets]);
 
-  // Load current task from calendar
   useEffect(() => {
     const loadCurrentTask = async () => {
       try {
@@ -46,11 +43,9 @@ const PomodoroTimer = () => {
           const currentMinute = now.getMinutes();
           const currentTimeInMinutes = currentHour * 60 + currentMinute;
 
-          // Find the task that should be happening now
           let foundTask = null;
           for (const task of todayEvents) {
             if (task.assigned_time) {
-              // Parse the assigned_time to get start and end times
               const timeRange = parseTimeRange(task.assigned_time);
               if (timeRange) {
                 const taskStartHour = timeRange.start.getHours();
@@ -61,7 +56,6 @@ const PomodoroTimer = () => {
                 const taskEndMinute = timeRange.end.getMinutes();
                 const taskEndTimeInMinutes = taskEndHour * 60 + taskEndMinute;
 
-                // Check if current time is within this task's time range
                 if (currentTimeInMinutes >= taskStartTimeInMinutes && currentTimeInMinutes < taskEndTimeInMinutes) {
                   foundTask = task;
                   break;
@@ -83,26 +77,22 @@ const PomodoroTimer = () => {
 
     loadCurrentTask();
     
-    // Refresh current task every minute
     const interval = setInterval(loadCurrentTask, 60000);
     
     return () => clearInterval(interval);
   }, []);
 
-  // Helper function to parse time range (same as in Calendar component)
   const parseTimeRange = (assignedTime) => {
     if (!assignedTime) return null;
     
     try {
       let startTime, endTime;
       
-      // Try to parse PostgreSQL range format: ["2025-07-14 16:00:00","2025-07-14 17:00:00")
       const postgresMatch = assignedTime.match(/\["([^"]+)","([^"]+)"\)/);
       if (postgresMatch) {
         startTime = postgresMatch[1];
         endTime = postgresMatch[2];
       } else {
-        // Try to parse ISO format: [2025-07-14T14:00:00,2025-07-14T15:00:00)
         const isoMatch = assignedTime.match(/\[([^,]+),([^)]+)\)/);
         if (isoMatch) {
           startTime = isoMatch[1];
@@ -112,11 +102,9 @@ const PomodoroTimer = () => {
         }
       }
       
-      // Convert space format to ISO format for proper Date parsing if needed
       const cleanStartTime = startTime.includes('T') ? startTime : startTime.replace(' ', 'T');
       const cleanEndTime = endTime.includes('T') ? endTime : endTime.replace(' ', 'T');
       
-      // Parse as local time directly
       const startDate = new Date(cleanStartTime);
       const endDate = new Date(cleanEndTime);
       
@@ -134,30 +122,25 @@ const PomodoroTimer = () => {
     }
   };
 
-  // Handle timer completion
   const handleTimerComplete = useCallback(() => {
     setIsRunning(false);
     
     if (isWorkTime) {
-      // Work session completed, switch to break
       setIsWorkTime(false);
       const preset = timerPresets[selectedMode];
       setTimeLeft(preset.break * 60);
     } else {
-      // Break completed, switch to work
       setIsWorkTime(true);
       const preset = timerPresets[selectedMode];
       setTimeLeft(preset.work * 60);
     }
   }, [isWorkTime, timerPresets, selectedMode]);
 
-  // Timer countdown
   useEffect(() => {
     if (isRunning && timeLeft > 0) {
       intervalRef.current = setInterval(() => {
         setTimeLeft(prev => {
           if (prev <= 1) {
-            // Timer finished
             playNotification();
             return 0;
           }
@@ -165,7 +148,6 @@ const PomodoroTimer = () => {
         });
       }, 1000);
     } else if (timeLeft === 0) {
-      // Timer completed
       handleTimerComplete();
     }
 
@@ -176,19 +158,16 @@ const PomodoroTimer = () => {
     };
   }, [isRunning, timeLeft, handleTimerComplete]);
 
-  // Audio notification
   const playNotification = () => {
     if (audioRef.current) {
       audioRef.current.play().catch(e => console.log('Audio play failed:', e));
     }
   };
 
-  // Start/pause timer
   const toggleTimer = () => {
     setIsRunning(!isRunning);
   };
 
-  // Reset timer
   const resetTimer = () => {
     setIsRunning(false);
     const preset = timerPresets[selectedMode];
@@ -196,21 +175,18 @@ const PomodoroTimer = () => {
     setIsWorkTime(true);
   };
 
-  // Format time display
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Calculate progress percentage
   const getProgressPercentage = () => {
     const preset = timerPresets[selectedMode];
     const totalTime = isWorkTime ? preset.work * 60 : preset.break * 60;
     return ((totalTime - timeLeft) / totalTime) * 100;
   };
 
-  // Handle custom time input
   const handleCustomTimeChange = (value, type) => {
     const numValue = parseInt(value) || 0;
     if (type === 'work') {
@@ -220,7 +196,6 @@ const PomodoroTimer = () => {
     }
   };
 
-  // Save custom settings
   const saveCustomSettings = () => {
     if (customWork > 0 && customBreak > 0) {
       setSelectedMode('custom');
@@ -228,7 +203,6 @@ const PomodoroTimer = () => {
     }
   };
 
-  // Format time range for display
   const formatTimeRange = (assignedTime) => {
     const timeRange = parseTimeRange(assignedTime);
     if (!timeRange) return '';
@@ -239,8 +213,7 @@ const PomodoroTimer = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto h-full flex flex-col">
-      {/* Header */}
+    <div className="w-full max-w-2xl mx-auto h-full flex flex-col">  
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold" style={{ color: '#6ee7b7' }}>
           Pomodoro Timer
@@ -250,7 +223,6 @@ const PomodoroTimer = () => {
         </p>
       </div>
 
-      {/* Timer Presets */}
       <div className="mb-8">
         <div className="flex gap-3 justify-center mb-4">
           {Object.entries(timerPresets).map(([key, value]) => (
@@ -270,13 +242,10 @@ const PomodoroTimer = () => {
         </div>
       </div>
 
-      {/* Timer Display */}
       <div className="flex-1 flex flex-col items-center justify-center">
         <div className="text-center">
-          {/* Progress Circle */}
           <div className="relative w-72 h-72 mb-8 -mt-8">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-              {/* Background circle - gray background */}
               <circle
                 cx="50"
                 cy="50"
@@ -285,7 +254,6 @@ const PomodoroTimer = () => {
                 stroke="#374151"
                 strokeWidth="6"
               />
-              {/* Progress circle - emerald that depletes over time */}
               <circle
                 cx="50"
                 cy="50"
@@ -300,7 +268,6 @@ const PomodoroTimer = () => {
               />
             </svg>
             
-            {/* Timer text */}
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <div className="text-5xl font-bold text-white mb-2">
                 {formatTime(timeLeft)}
@@ -311,7 +278,6 @@ const PomodoroTimer = () => {
             </div>
           </div>
 
-          {/* Controls */}
           <div className="flex gap-4 justify-center mb-6">
             <button
               onClick={toggleTimer}
@@ -342,7 +308,6 @@ const PomodoroTimer = () => {
             </button>
           </div>
 
-          {/* Session Counter */}
           <div className="text-center">
             {currentTask ? (
               <div className="bg-gray-700 rounded-lg p-4 max-w-sm mx-auto">
@@ -362,7 +327,6 @@ const PomodoroTimer = () => {
         </div>
       </div>
 
-      {/* Custom Settings Modal */}
       {showCustomModal && (
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-xl p-6 w-full max-w-sm mx-4 border border-gray-700">
@@ -432,7 +396,6 @@ const PomodoroTimer = () => {
         </div>
       )}
 
-      {/* Hidden audio element for notifications */}
       <audio ref={audioRef} preload="auto">
         <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT" />
       </audio>

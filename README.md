@@ -41,6 +41,9 @@ A modern, full-stack productivity application built with React and Supabase that
 
 ## 🚀 Getting Started
 
+### ⚠️ **Security Note**
+This project uses environment variables to keep your Supabase credentials secure. Never commit your actual `.env.local` file to version control. The `.env.local` file is already included in `.gitignore` to prevent accidental commits.
+
 ### Prerequisites
 - Node.js (v16 or higher)
 - npm or yarn package manager
@@ -59,11 +62,17 @@ A modern, full-stack productivity application built with React and Supabase that
    ```
 
 3. **Set up environment variables**
-   Create a `.env` file in the `prodspace-web` directory:
+   Create a `.env.local` file in the `prodspace-web` directory:
    ```env
-   REACT_APP_SUPABASE_URL=your_supabase_url
-   REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
+   REACT_APP_SUPABASE_URL=https://your-project-id.supabase.co
+   REACT_APP_SUPABASE_ANON_KEY=your-anon-key-here
    ```
+   
+   **To get your Supabase credentials:**
+   - Go to your [Supabase Dashboard](https://supabase.com/dashboard)
+   - Select your project
+   - Navigate to Settings → API
+   - Copy the "Project URL" and "anon public" key
 
 4. **Start the development server**
    ```bash

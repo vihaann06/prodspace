@@ -1,6 +1,5 @@
 import { supabase } from '../lib/supabase';
 
-// Fetch all habits for the current user
 export const fetchHabits = async () => {
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -22,7 +21,6 @@ export const fetchHabits = async () => {
   }
 };
 
-// Add a new habit
 export const addHabit = async (habitData) => {
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -54,7 +52,6 @@ export const addHabit = async (habitData) => {
   }
 };
 
-// Track a habit for today (for starting habits)
 export const trackHabit = async (habitId) => {
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -63,7 +60,6 @@ export const trackHabit = async (habitId) => {
 
     const today = new Date().toISOString().split('T')[0];
     
-    // Get current habit data
     const { data: habit, error: fetchError } = await supabase
       .from('habits')
       .select('*')
@@ -75,12 +71,10 @@ export const trackHabit = async (habitId) => {
     let newStreak = habit.current_streak || 0;
     let newLongestStreak = habit.longest_streak || 0;
 
-    // Check if already tracked today
     if (habit.last_tracked_date === today) {
       return { error: 'Already tracked for today' };
     }
 
-    // Check if this is consecutive (yesterday was tracked)
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
@@ -88,15 +82,13 @@ export const trackHabit = async (habitId) => {
     if (habit.last_tracked_date === yesterdayStr) {
       newStreak += 1;
     } else {
-      newStreak = 1; // Reset streak if not consecutive
+      newStreak = 1;
     }
 
-    // Update longest streak if current streak is longer
     if (newStreak > newLongestStreak) {
       newLongestStreak = newStreak;
     }
 
-    // Update habit
     const { error } = await supabase
       .from('habits')
       .update({
@@ -114,7 +106,6 @@ export const trackHabit = async (habitId) => {
   }
 };
 
-// Record a relapse for quitting habits
 export const recordRelapse = async (habitId) => {
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -123,7 +114,6 @@ export const recordRelapse = async (habitId) => {
 
     const now = new Date().toISOString();
     
-    // Get current habit data
     const { error: fetchError } = await supabase
       .from('habits')
       .select('*')
@@ -132,7 +122,6 @@ export const recordRelapse = async (habitId) => {
 
     if (fetchError) throw fetchError;
 
-    // Reset the streak and update last relapse timestamp
     const { error } = await supabase
       .from('habits')
       .update({
@@ -149,7 +138,6 @@ export const recordRelapse = async (habitId) => {
   }
 };
 
-// Get habit statistics
 export const getHabitStats = async (habitId) => {
   try {
     const { data: habit, error } = await supabase
@@ -164,7 +152,6 @@ export const getHabitStats = async (habitId) => {
     const today = new Date();
     const daysSinceStart = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
 
-    // Calculate time since last relapse for quitting habits
     let timeSinceRelapse = null;
     if (habit.habit_type === 'quitting' && habit.last_relapse_date) {
       const lastRelapse = new Date(habit.last_relapse_date);
@@ -194,7 +181,6 @@ export const getHabitStats = async (habitId) => {
   }
 };
 
-// Get habit tracking history for calendar view
 export const getHabitTrackingHistory = async (habitId) => {
   try {
     const { data: habit, error } = await supabase
@@ -205,12 +191,9 @@ export const getHabitTrackingHistory = async (habitId) => {
 
     if (error) throw error;
 
-    // For now, we'll use the last_tracked_date to create a simple tracking history
-    // In a more complete implementation, you'd have a separate tracking_logs table
     const trackedDates = [];
     
     if (habit.last_tracked_date) {
-      // For starting habits, we can estimate tracked dates based on streak
       if (habit.habit_type === 'starting' && habit.current_streak > 0) {
         const lastTracked = new Date(habit.last_tracked_date);
         for (let i = 0; i < habit.current_streak; i++) {
@@ -219,7 +202,6 @@ export const getHabitTrackingHistory = async (habitId) => {
           trackedDates.push(date.toISOString().split('T')[0]);
         }
       } else {
-        // Add the last tracked date
         trackedDates.push(habit.last_tracked_date);
       }
     }
@@ -234,7 +216,6 @@ export const getHabitTrackingHistory = async (habitId) => {
   }
 };
 
-// Update a habit
 export const updateHabit = async (id, updates) => {
   try {
     const { error } = await supabase
@@ -250,7 +231,6 @@ export const updateHabit = async (id, updates) => {
   }
 };
 
-// Delete a habit (hard delete from database)
 export const deleteHabit = async (id) => {
   try {
     const { error } = await supabase
@@ -266,7 +246,6 @@ export const deleteHabit = async (id) => {
   }
 };
 
-// Set up real-time subscription for habits
 export const subscribeToHabits = (callback) => {
   const subscription = supabase
     .channel('habits_changes')
@@ -277,12 +256,10 @@ export const subscribeToHabits = (callback) => {
         table: 'habits'
       },
       (payload) => {
-        console.log('Real-time update:', payload);
         callback();
       }
     )
     .subscribe((status) => {
-      console.log('Subscription status:', status);
     });
 
   return subscription;

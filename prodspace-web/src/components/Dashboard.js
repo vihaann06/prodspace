@@ -21,7 +21,6 @@ const Dashboard = ({ onSignOut }) => {
   const [isAnonymousUser, setIsAnonymousUser] = useState(false);
   const navigate = useNavigate();
 
-  // Tool definitions
   const tools = [
     {
       id: 'pomodoro',
@@ -49,18 +48,15 @@ const Dashboard = ({ onSignOut }) => {
     }
   ];
 
-  // Load user profile and check for unscheduled todos
   useEffect(() => {
     const loadUserProfile = async () => {
       try {
-        // Get current user first
         const userResult = await authService.getCurrentUser();
         if (userResult.success && userResult.user) {
           console.log('👤 Loading profile for user:', userResult.user.id);
           console.log('👤 User metadata:', userResult.user.user_metadata);
           console.log('👤 App metadata:', userResult.user.app_metadata);
           
-          // Check if user is anonymous - try multiple detection methods
           const isAnonymous = 
             userResult.user.app_metadata?.provider === 'anonymous' ||
             userResult.user.email === null ||
@@ -78,14 +74,12 @@ const Dashboard = ({ onSignOut }) => {
           } else {
             setIsAnonymousUser(false);
             console.log('👤 Regular user detected');
-            // Get user profile
             const profileResult = await authService.getUserProfile(userResult.user.id);
             if (profileResult.success) {
               setUserProfile(profileResult.profile);
               console.log('✅ Profile loaded:', profileResult.profile);
             } else {
               console.warn('⚠️ Could not load profile:', profileResult.error);
-              // Fallback to auth user data
               setUserProfile({
                 first_name: userResult.user.user_metadata?.first_name || 'User',
                 last_name: userResult.user.user_metadata?.last_name || '',
@@ -118,8 +112,7 @@ const Dashboard = ({ onSignOut }) => {
     loadUserProfile();
     checkUnscheduledTodos();
 
-    // Set up interval to check for unscheduled todos
-    const interval = setInterval(checkUnscheduledTodos, 30000); // Check every 30 seconds
+    const interval = setInterval(checkUnscheduledTodos, 30000);
 
     return () => clearInterval(interval);
   }, []);
@@ -131,19 +124,16 @@ const Dashboard = ({ onSignOut }) => {
     navigate('/signin');
   };
 
-  // Get display name
   const getDisplayName = () => {
     if (isLoadingProfile) return 'User';
     if (userProfile?.first_name) return userProfile.first_name;
     return 'User';
   };
 
-  // Get current tool
   const getCurrentTool = () => {
     return tools.find(tool => tool.id === selectedTool);
   };
 
-  // Render main content based on selected tool
   const renderMainContent = () => {
     if (!selectedTool) {
       return (
@@ -196,11 +186,8 @@ const Dashboard = ({ onSignOut }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
-      {/* Main Layout - Full height */}
       <div className="flex h-screen relative">
-        {/* Sidebar - extends to full left edge and bottom with header elements */}
         <div className="w-1/3 bg-gray-800 rounded-r-2xl shadow-2xl p-6 relative z-10">
-          {/* Header Section */}
           <div className="flex justify-between items-center mb-8 ml-4">
             <h1 className="text-3xl font-bold" style={{ color: '#6ee7b7' }}>ProdSpace</h1>
             <button 
@@ -211,7 +198,6 @@ const Dashboard = ({ onSignOut }) => {
             </button>
           </div>
 
-          {/* User Greeting */}
           <div className="mb-8 p-4 rounded-xl">
             <h2 className="text-2xl font-bold text-white mb-2">
               Hi {getDisplayName()}!
@@ -221,7 +207,6 @@ const Dashboard = ({ onSignOut }) => {
             </p>
           </div>
 
-          {/* Tools Navigation */}
           <div className="space-y-3">
             <h3 className="text-lg font-semibold text-white mb-4 px-2">
               Your Tools
@@ -241,7 +226,6 @@ const Dashboard = ({ onSignOut }) => {
                   <div className="flex items-center space-x-3">
                     <div className={`relative ${selectedTool === tool.id ? 'text-white' : 'text-gray-300'}`}>
                       <IconComponent className="w-6 h-6" />
-                      {/* Notification dot for calendar */}
                       {tool.id === 'calendar' && hasUnscheduledTodos && (
                         <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
                       )}
@@ -268,8 +252,6 @@ const Dashboard = ({ onSignOut }) => {
             })}
           </div>
         </div>
-
-        {/* Main Content Area - extends to full screen width and height with increased overlap */}
         <div className="flex-1 bg-gray-900 rounded-l-2xl shadow-xl p-8 -ml-8 relative z-0">
           {renderMainContent()}
         </div>

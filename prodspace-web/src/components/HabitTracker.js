@@ -11,11 +11,9 @@ const HabitTracker = () => {
   const [habitStats, setHabitStats] = useState({});
   const [habitTrackingHistory, setHabitTrackingHistory] = useState({});
 
-  // Load habits from Supabase
   useEffect(() => {
     loadHabits();
     
-    // Set up real-time subscription
     const subscription = subscribeToHabits(() => {
       loadHabits();
     });
@@ -37,7 +35,6 @@ const HabitTracker = () => {
       
       setHabits(habitsData);
       
-      // Load stats and tracking history for each habit
       const stats = {};
       const trackingHistory = {};
       for (const habit of habitsData) {
@@ -69,10 +66,8 @@ const HabitTracker = () => {
         return;
       }
       
-      // Add to local state for immediate UI update
       if (newHabit) {
         setHabits([newHabit, ...habits]);
-        // Add initial stats
         setHabitStats(prev => ({
           ...prev,
           [newHabit.id]: {
@@ -100,7 +95,6 @@ const HabitTracker = () => {
         return;
       }
       
-      // Reload habits to get updated data
       await loadHabits();
     } catch (error) {
       console.error('Error tracking habit:', error);
@@ -116,7 +110,6 @@ const HabitTracker = () => {
         return;
       }
       
-      // Reload habits to get updated data
       await loadHabits();
     } catch (error) {
       console.error('Error recording relapse:', error);
@@ -132,7 +125,6 @@ const HabitTracker = () => {
         return;
       }
       
-      // Remove from local state
       setHabits(habits.filter(habit => habit.id !== id));
       setHabitStats(prev => {
         const newStats = { ...prev };
@@ -169,7 +161,6 @@ const HabitTracker = () => {
 
   return (
     <div className="w-full max-w-6xl mx-auto h-full flex flex-col ml-8">
-      {/* Header */}
       <div className="mb-8">
         <h2 className="text-3xl font-bold" style={{ color: '#6ee7b7' }}>
           Habit Tracker
@@ -179,10 +170,8 @@ const HabitTracker = () => {
         </p>
       </div>
 
-      {/* Habits Grid */}
       <div className="flex-1 overflow-y-auto pr-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Add Habit Card */}
           <button
             onClick={() => setShowAddModal(true)}
             className="h-48 bg-gray-800 rounded-xl border-2 border-dashed border-gray-600 hover:border-gray-500 transition-all duration-200 flex flex-col items-center justify-center group"
@@ -193,7 +182,6 @@ const HabitTracker = () => {
             </p>
           </button>
 
-          {/* Habit Cards */}
           {habits.map((habit) => {
             const stats = habitStats[habit.id] || {};
             const trackedToday = isTrackedToday(habit);
@@ -205,7 +193,6 @@ const HabitTracker = () => {
                 className="h-48 bg-gray-800 rounded-xl border border-gray-700 hover:border-gray-600 transition-all duration-200 p-4 text-left group cursor-pointer"
               >
                 <div className="flex h-full">
-                  {/* Left Side - Streak/Clean Days */}
                   <div className="flex flex-col justify-center items-center w-20 mr-4">
                     {habit.habit_type === 'starting' ? (
                       <div className="text-center">
@@ -227,10 +214,8 @@ const HabitTracker = () => {
                       </div>
                     )}
                   </div>
-
-                  {/* Right Side - Content */}
+                
                   <div className="flex-1 flex flex-col">
-                    {/* Header */}
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <Target className="w-4 h-4" style={{ color: '#6ee7b7' }} />
@@ -244,24 +229,20 @@ const HabitTracker = () => {
                       </div>
                     </div>
                     
-                    {/* Title */}
                     <h3 className="text-base font-semibold text-white mb-1 group-hover:text-gray-200 transition-colors line-clamp-1">
                       {habit.name}
                     </h3>
                     
-                    {/* Description */}
                     {habit.description && (
                       <p className="text-xs text-gray-400 mb-2 line-clamp-2">
                         {habit.description}
                       </p>
                     )}
                     
-                    {/* Frequency */}
                     <div className="text-xs text-gray-500 mb-3">
                       {habit.frequency}
                     </div>
 
-                    {/* Action Buttons */}
                     <div className="flex gap-1 mt-auto">
                       {habit.habit_type === 'starting' ? (
                         <button
@@ -306,7 +287,6 @@ const HabitTracker = () => {
         </div>
       </div>
 
-      {/* Add Habit Modal */}
       {showAddModal && (
         <AddHabitModal 
           onClose={() => setShowAddModal(false)}
@@ -314,7 +294,6 @@ const HabitTracker = () => {
         />
       )}
 
-      {/* Habit Details Modal */}
       {showHabitModal && selectedHabit && (
         <HabitDetailsModal
           habit={selectedHabit}
@@ -334,7 +313,6 @@ const HabitTracker = () => {
   );
 };
 
-// Add Habit Modal Component
 const AddHabitModal = ({ onClose, onAdd }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -449,14 +427,12 @@ const AddHabitModal = ({ onClose, onAdd }) => {
   );
 };
 
-// Habit Calendar Component
 const HabitCalendar = ({ trackedDates, startDate }) => {
   const today = new Date();
   
-  // Generate calendar days (last 30 days)
   const days = [];
   const calendarStart = new Date(today);
-  calendarStart.setDate(calendarStart.getDate() - 29); // Show last 30 days
+  calendarStart.setDate(calendarStart.getDate() - 29);
   
   for (let i = 0; i < 30; i++) {
     const date = new Date(calendarStart);
@@ -473,7 +449,6 @@ const HabitCalendar = ({ trackedDates, startDate }) => {
     });
   }
 
-  // Group days by week
   const weeks = [];
   for (let i = 0; i < days.length; i += 7) {
     weeks.push(days.slice(i, i + 7));
@@ -511,7 +486,6 @@ const HabitCalendar = ({ trackedDates, startDate }) => {
   );
 };
 
-// Habit Details Modal Component
 const HabitDetailsModal = ({ habit, stats, trackingHistory, onClose, onDelete, onTrack, onRelapse, isTrackedToday }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style={{ left: '33.333333%' }}>
@@ -549,8 +523,7 @@ const HabitDetailsModal = ({ habit, stats, trackingHistory, onClose, onDelete, o
             <span className="text-gray-500">Frequency:</span>
             <p className="text-white capitalize">{habit.frequency}</p>
           </div>
-
-          {/* Statistics */}
+            
           <div className="bg-gray-700 rounded-lg p-4 space-y-3">
             <h5 className="text-white font-medium">Tracking Calendar</h5>
             
@@ -586,7 +559,6 @@ const HabitDetailsModal = ({ habit, stats, trackingHistory, onClose, onDelete, o
           </div>
         </div>
         
-        {/* Action Buttons */}
         <div className="space-y-3">
           {habit.habit_type === 'starting' ? (
             <button

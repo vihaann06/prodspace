@@ -45,14 +45,12 @@ export const useTodos = () => {
     const newStatus = task.status === 'completed' ? 'pending' : 'completed';
     const completedAt = newStatus === 'completed' ? new Date().toISOString() : null;
 
-    // Optimistic update
     setTasks(tasks.map(t => 
       t.id === id ? { ...t, status: newStatus, completed_at: completedAt } : t
     ));
 
     const { error } = await updateTodoStatus(id, newStatus, completedAt);
     if (error) {
-      // Revert on error
       setTasks(tasks.map(t => 
         t.id === id ? { ...t, status: task.status, completed_at: task.completed_at } : t
       ));
@@ -62,12 +60,10 @@ export const useTodos = () => {
   const removeTask = async (id) => {
     const taskToDelete = tasks.find(t => t.id === id);
     
-    // Optimistic update
     setTasks(tasks.filter(task => task.id !== id));
 
     const { error } = await deleteTodo(id);
     if (error && taskToDelete) {
-      // Revert on error
       setTasks([...tasks, taskToDelete]);
     }
   };
@@ -76,12 +72,10 @@ export const useTodos = () => {
     const originalTask = tasks.find(t => t.id === id);
     if (!originalTask) return;
 
-    // Optimistic update
     setTasks(tasks.map(t => t.id === id ? { ...t, text: newText } : t));
 
     const { error } = await updateTodoText(id, newText);
     if (error) {
-      // Revert on error
       setTasks(tasks.map(t => t.id === id ? { ...t, text: originalTask.text } : t));
     }
   };

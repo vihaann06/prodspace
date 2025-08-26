@@ -20,7 +20,6 @@ const SignUp = ({ onSignUp }) => {
       ...formData,
       [e.target.name]: e.target.value
     });
-    // Clear error when user starts typing
     if (errors[e.target.name]) {
       setErrors({
         ...errors,
@@ -369,16 +368,12 @@ const SignUp = ({ onSignUp }) => {
 
   return (
     <div className="h-screen bg-gradient-to-br from-gray-900 to-gray-800 overflow-hidden">
-      {/* Main Layout - Full height */}
       <div className="flex h-full relative">
-        {/* Left Section - Sign Up Form */}
         <div className="w-1/2 bg-gray-800 rounded-r-2xl shadow-2xl p-6 relative z-10 overflow-hidden">
-          {/* Header Section */}
           <div className="flex justify-between items-center mb-6 ml-4">
             <h1 className="text-3xl font-bold" style={{ color: '#6ee7b7' }}>ProdSpace</h1>
           </div>
 
-          {/* Sign Up Form */}
           <div className="flex flex-col justify-start h-full pt-16">
             <div className="w-full max-w-md mx-auto">
               <div className="text-center mb-6">
@@ -423,8 +418,7 @@ const SignUp = ({ onSignUp }) => {
             </div>
           </div>
         </div>
-
-        {/* Right Section - Informational Content */}
+                  
         <div className="flex-1 bg-gray-900 rounded-l-2xl shadow-xl p-8 -ml-8 relative z-0">
           <div className="flex items-center justify-center h-full">
             <div className="text-center max-w-md">

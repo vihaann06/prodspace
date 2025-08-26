@@ -11,13 +11,10 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check authentication status on app startup
   useEffect(() => {
     const checkAuthStatus = async () => {
-      console.log('🚀 App starting - checking authentication status...');
       
       try {
-        // Check if user is already authenticated
         const result = await authService.getCurrentUser();
         
         if (result.success && result.user) {
@@ -36,7 +33,6 @@ function App() {
     checkAuthStatus();
   }, []);
 
-  // Authentication handlers using Supabase
   const handleSignIn = async (user) => {
     console.log('Signing in user:', user.id);
     setIsAuthenticated(true);
@@ -59,7 +55,6 @@ function App() {
     }
   };
 
-  // Show loading state while checking auth
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">

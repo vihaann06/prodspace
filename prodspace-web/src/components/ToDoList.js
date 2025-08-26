@@ -137,7 +137,6 @@ const ToDoList = () => {
 
   return (
     <div className="w-full max-w-2xl mx-auto h-full flex flex-col">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-3xl font-bold" style={{ color: '#6ee7b7' }}>
@@ -161,7 +160,6 @@ const ToDoList = () => {
         </button>
       </div>
 
-      {/* Statistics */}
       {showStats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-800 rounded-xl border border-gray-700">
           <div className="text-center">
@@ -183,7 +181,6 @@ const ToDoList = () => {
         </div>
       )}
 
-      {/* Add Task Form */}
       <div className="mb-2">
         <div className="flex gap-3 mb-4">
           <input
@@ -227,7 +224,6 @@ const ToDoList = () => {
         </div>
       </div>
 
-      {/* Filter Buttons */}
       <div className="flex gap-2 mb-6">
         {['all', 'active', 'completed'].map(filterType => (
           <button
@@ -245,7 +241,6 @@ const ToDoList = () => {
         ))}
       </div>
 
-      {/* Tasks List - Scrollable */}
       <div className="flex-1 overflow-y-auto mb-6 scrollbar-hide">
         <div className="space-y-3">
           {filteredTasks.length === 0 ? (
@@ -266,8 +261,7 @@ const ToDoList = () => {
           )}
         </div>
       </div>
-
-      {/* Progress Bar - Fixed at bottom */}
+            
       {tasks.length > 0 && (
         <div className="mt-auto p-4 bg-gray-800 rounded-xl border border-gray-700">
           <div className="flex justify-between items-center mb-2">

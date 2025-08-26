@@ -1,6 +1,5 @@
 import { supabase } from '../lib/supabase';
 
-// Fetch all todos for the current user
 export const fetchTodos = async () => {
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -21,7 +20,6 @@ export const fetchTodos = async () => {
   }
 };
 
-// Add a new todo
 export const addTodo = async (text, estimate = null) => {
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -33,7 +31,7 @@ export const addTodo = async (text, estimate = null) => {
       text: text.trim(),
       estimate: estimate ? parseInt(estimate) : null,
       status: 'pending',
-      placed: false // explicitly set placed to false
+      placed: false
     };
 
     const { data, error } = await supabase
@@ -49,7 +47,6 @@ export const addTodo = async (text, estimate = null) => {
   }
 };
 
-// Update todo status (toggle complete/pending)
 export const updateTodoStatus = async (id, status, completedAt = null) => {
   try {
     const { error } = await supabase
@@ -68,7 +65,6 @@ export const updateTodoStatus = async (id, status, completedAt = null) => {
   }
 };
 
-// Update todo text
 export const updateTodoText = async (id, text) => {
   try {
     const { error } = await supabase
@@ -84,7 +80,6 @@ export const updateTodoText = async (id, text) => {
   }
 };
 
-// Delete a todo
 export const deleteTodo = async (id) => {
   try {
     const { error } = await supabase
@@ -100,7 +95,6 @@ export const deleteTodo = async (id) => {
   }
 };
 
-// Set up real-time subscription for todos
 export const subscribeToTodos = (callback) => {
   const subscription = supabase
     .channel('todos_changes')
@@ -111,12 +105,10 @@ export const subscribeToTodos = (callback) => {
         table: 'todos'
       },
       (payload) => {
-        console.log('Real-time update:', payload);
         callback();
       }
     )
     .subscribe((status) => {
-      console.log('Subscription status:', status);
     });
 
   return subscription;

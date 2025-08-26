@@ -1,6 +1,5 @@
 import { supabase } from '../lib/supabase';
 
-// Fetch todos scheduled for today
 export const fetchTodayEvents = async () => {
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -12,7 +11,6 @@ export const fetchTodayEvents = async () => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-    // Query for todos that have assigned_time and the range overlaps with today
     const { data: todos, error } = await supabase
       .from('todos')
       .select('*')
@@ -29,29 +27,19 @@ export const fetchTodayEvents = async () => {
   }
 };
 
-// Assign a todo to a specific time slot
 export const assignTodoToTime = async (todoId, startTime, durationMinutes) => {
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError) throw userError;
     if (!user) throw new Error('No user found');
 
-    // Calculate end time - ensure we're working with local time
     const startDate = new Date(startTime);
     const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
     
-    // Format as local time strings without timezone info
-    const startTimeLocal = startDate.toISOString().slice(0, 19); // Remove timezone info
-    const endTimeLocal = endDate.toISOString().slice(0, 19); // Remove timezone info
+    const startTimeLocal = startDate.toISOString().slice(0, 19);
+    const endTimeLocal = endDate.toISOString().slice(0, 19);
     
     const assignedTime = `[${startTimeLocal},${endTimeLocal})`;
-
-    console.log('🕐 Creating assigned_time range:', {
-      startTime,
-      startTimeLocal,
-      endTimeLocal,
-      assignedTime
-    });
 
     const { data, error } = await supabase
       .from('todos')
@@ -68,25 +56,15 @@ export const assignTodoToTime = async (todoId, startTime, durationMinutes) => {
   }
 };
 
-// Update todo time assignment
 export const updateTodoTime = async (todoId, startTime, durationMinutes) => {
   try {
-    // Calculate end time - ensure we're working with local time
     const startDate = new Date(startTime);
     const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
     
-    // Format as local time strings without timezone info
-    const startTimeLocal = startDate.toISOString().slice(0, 19); // Remove timezone info
-    const endTimeLocal = endDate.toISOString().slice(0, 19); // Remove timezone info
+    const startTimeLocal = startDate.toISOString().slice(0, 19);
+    const endTimeLocal = endDate.toISOString().slice(0, 19);
     
     const assignedTime = `[${startTimeLocal},${endTimeLocal})`;
-
-    console.log('🕐 Updating assigned_time range:', {
-      startTime,
-      startTimeLocal,
-      endTimeLocal,
-      assignedTime
-    });
 
     const { error } = await supabase
       .from('todos')
@@ -101,7 +79,6 @@ export const updateTodoTime = async (todoId, startTime, durationMinutes) => {
   }
 };
 
-// Remove todo from calendar (clear assigned_time)
 export const removeTodoFromCalendar = async (todoId) => {
   try {
     const { error } = await supabase
@@ -117,7 +94,6 @@ export const removeTodoFromCalendar = async (todoId) => {
   }
 };
 
-// Get unscheduled todos (todos without assigned_time)
 export const getUnscheduledTodos = async () => {
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -139,22 +115,12 @@ export const getUnscheduledTodos = async () => {
   }
 };
 
-// Helper function to extract start time from assigned_time range
 export const getStartTimeFromRange = (assignedTime) => {
   if (!assignedTime) return null;
   
   try {
-    // Extract start time from range format [start,end)
     const startTime = assignedTime.slice(1, assignedTime.indexOf(','));
-    console.log('🔍 Extracting start time from range:', {
-      assignedTime,
-      startTime,
-      rangeStart: assignedTime.slice(1, assignedTime.indexOf(',')),
-      rangeEnd: assignedTime.slice(assignedTime.indexOf(',') + 1, -1)
-    });
     
-    // Validate that the extracted time is valid
-    // Add timezone info if missing to ensure proper parsing
     let timeToTest = startTime;
     if (!startTime.includes('Z') && !startTime.includes('+')) {
       timeToTest = startTime + 'Z';
@@ -162,31 +128,26 @@ export const getStartTimeFromRange = (assignedTime) => {
     
     const testDate = new Date(timeToTest);
     if (isNaN(testDate.getTime())) {
-      console.error('❌ Invalid start time extracted:', startTime);
       return null;
     }
     
     return startTime;
   } catch (error) {
-    console.error('❌ Error extracting start time from range:', error, assignedTime);
     return null;
   }
 };
 
-// Helper function to extract duration from assigned_time range
 export const getDurationFromRange = (assignedTime) => {
   if (!assignedTime) return 0;
-  // Extract start and end times from range format [start,end)
   const startTime = assignedTime.slice(1, assignedTime.indexOf(','));
   const endTime = assignedTime.slice(assignedTime.indexOf(',') + 1, -1);
   
   const start = new Date(startTime);
   const end = new Date(endTime);
   
-  return Math.round((end - start) / 60000); // Convert to minutes
+  return Math.round((end - start) / 60000);
 };
 
-// Set up real-time subscription for todos
 export const subscribeToCalendarEvents = (callback) => {
   const subscription = supabase
     .channel('todos_calendar_changes')
@@ -197,12 +158,10 @@ export const subscribeToCalendarEvents = (callback) => {
         table: 'todos'
       },
       (payload) => {
-        console.log('Real-time todos update:', payload);
         callback();
       }
     )
     .subscribe((status) => {
-      console.log('Todos subscription status:', status);
     });
 
   return subscription;
